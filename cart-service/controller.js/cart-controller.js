@@ -109,6 +109,7 @@ const GetCart = async (req, res) => {
 const Checkout = async (req, res) => {
     try {
       const cart = await Cart.findOne({ userId: req.id });
+      const {num} = req.body
       if (!cart) {
         return res.status(404).json({ message: 'Cart not found' });
       }
@@ -142,7 +143,12 @@ const Checkout = async (req, res) => {
       if (!stripe_link) {
         return res.status(500).json({ message: 'Stripe payment link not found' });
       }
-  
+      if(num ===0){
+        cart.products = [];
+        cart.totalPrice = 0;
+        cart.totalItems = 0;
+        await cart.save();
+      }
       // Send the payment URL in the response
       return res.status(200).json({ message: 'Checkout successful', url: stripe_link });
   
