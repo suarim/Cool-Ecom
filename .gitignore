@@ -1,0 +1,15 @@
+identity_service/.env
+identity_service/node_modules
+identity_service/combined.log
+identity_service/error.log
+identity_service/info.log
+identity_service/warn.log
+cart-service/node_modules
+cart-service/.env
+email-service/node_modules
+email-service/.env
+email-service/combined.log
+email-service/error.log
+email-service/info.log
+payment-service/node_modules
+payment-service/.env

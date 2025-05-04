@@ -1,0 +1,20 @@
+{
+  "name": "cart-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "ioredis": "^5.6.1",
+    "kafkajs": "^2.2.4",
+    "mongoose": "^8.14.1"
+  }
+}
