@@ -3,7 +3,7 @@
 <!-- HEADER STYLE: CLASSIC -->
 <div align="center">
 
-<img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/>
+<img src="https://img.icons8.com/ios-glyphs/30/chili-pepper.png" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/>
 
 # COOL-ECOM.GIT
 
