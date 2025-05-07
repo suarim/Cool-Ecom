@@ -1,17 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const redisclient = require('ioredis')
+// const redisclient = require('ioredis')
 const {logger} = require('./utils/logger');
 const { default: mongoose } = require('mongoose');
 const router = require('./routes/identity_route');
 const userrouter = require('./routes/user_route');
 const {connectProducer} = require('./kafka/producer')
-const {run} = require('./kafka/consumer')
+const {run} = require('./kafka/consumer');
+const { redis } = require('./utils/redis');
 const app= express();
 app.use(cors());
 app.use(express.json());
-const redis = new redisclient(process.env.REDIS_URI)
+// const redis = new redisclient(process.env.REDIS_URI)
+
 logger.info('Connected to Redis')
 run(redis)
   .then(() => console.log('Kafka consumer connected and listening...'))
@@ -24,9 +26,13 @@ app.use((req,res,next)=>{
 
 app.get('/',(req,res)=>{
     return res.send('Welcome to Identity Service')
-}
-)
-app.use('/api/auth',router)
+})
+
+
+app.use('/api/auth/',(req,res,next)=>{
+    req.redis = redis;
+    next()
+},router)
 
 app.use('/api/user/',(req,res,next)=>{
     req.redis = redis;

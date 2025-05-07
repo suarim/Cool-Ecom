@@ -15,3 +15,7 @@ payment-service/node_modules
 payment-service/.env
 chat-service/node_modules
 chat-service/.env
+combined.log
+error.log
+info.log
+warn.log

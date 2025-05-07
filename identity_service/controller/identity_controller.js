@@ -8,6 +8,10 @@ const { date } = require('joi');
 const {emitUsercreateEvent} = require('../kafka/producer');
 
 const registerUser = async (req,res)=>{
+    if(!await req.redis.get(`verified:${req.body.email}`)){
+        logger.error('OTP not verified');
+        return res.status(400).json({success:false,message:'OTP not verified'});
+    }
     const {email,password,username,age} = req.body;
     const {error} = UserRegisterSchemaValidation(req.body);
     if(error){
@@ -19,8 +23,8 @@ const registerUser = async (req,res)=>{
         logger.error('User already exists');
         return res.status(400).json({message:'User already exists'});
     }
-    console.log(password)
-    const hashpassword = await argon2.hash(password,10);
+
+    const hashpassword = await argon2.hash(password);
     const newUser = new User({
         email,
         username,
@@ -38,6 +42,10 @@ const registerUser = async (req,res)=>{
 }
 
 const loginUser = async (req,res) =>{
+    if(!await req.redis.get(`verified:${req.body.email}`)){
+        logger.error('OTP not verified');
+        return res.status(400).json({success:false,message:'OTP not verified'});
+    }
     const {email,password} = req.body
     const {error} = UserLoginSchemaValidation(req.body)
     if(error){
@@ -49,9 +57,8 @@ const loginUser = async (req,res) =>{
         const match = await argon2.verify(user.password,password)
         if(match){
         logger.info('logged in successfully')
-        console.log({id:user._id,email:user.email})
         const token = await GenerateToken({id:user._id,email:user.email})
-        return res.status(201).json({success:true,message:'User created successfully',data:{
+        return res.status(201).json({success:true,message:'User logged in successfully',data:{
             email:user.email,username:user.username,age:user.age,authToken:token,createdAt:user.createdAt,updatedAt:user.updatedAt
         }});}
         else{

@@ -21,6 +21,7 @@
     "kafkajs": "^2.2.4",
     "mongoose": "^8.14.1",
     "rate-limit-redis": "^4.2.0",
+    "twilio": "^5.6.0",
     "winston": "^3.17.0"
   }
 }
