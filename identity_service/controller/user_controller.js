@@ -1,11 +1,17 @@
-const logger = require('../utils/logger')
+// const //logger = require('../utils///logger')
 const mongoose = require('mongoose');
-const {User} = require('../models/User')
+const {User} = require('../models/User');
+const {  getallUsersValidation } = require('../validation/validation');
 const getallUsers = async (req,res)=>{
+        const {error} = getallUsersValidation(req.body);
+        if(error){
+            // //logger.error('Validation error',error);
+            return res.status(400).json({message:error.details[0].message});
+        }
     const {limit,offset} = req.body;
         const cachedusers=await req.redis.get(`listusers;limit:${limit};offset:${offset}`)
         if(cachedusers){
-            // logger.info('cache hit')
+            //logger.info('cache hit')
             const users = JSON.parse(cachedusers);
             return res.status(200).json({success:true,message:"listing all users",users})
         }

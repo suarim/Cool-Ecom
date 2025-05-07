@@ -18,4 +18,12 @@ const UserLoginSchemaValidation = (data)=>{
     return schema.validate(data);
 }
 
-module.exports = {UserRegisterSchemaValidation,UserLoginSchemaValidation};
+const getallUsersValidation = (data)=>{
+    const schema =JOI.object({
+        limit:JOI.number().min(1).max(100).default(10),
+        offset:JOI.number().min(0).default(0)
+    })
+    return schema.validate(data);
+}
+
+module.exports = {UserRegisterSchemaValidation,UserLoginSchemaValidation,getallUsersValidation};
