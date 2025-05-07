@@ -16,7 +16,7 @@ const getallUsers = async (req,res)=>{
             return res.status(200).json({success:true,message:"listing all users",users})
         }
         const users = await User.find({}).limit(limit).skip(offset).select('-password')
-        req.redis.setex(`listusers;limit:${limit};offset:${offset}`,300,JSON.stringify(users))
+        await req.redis.setex(`listusers;limit:${limit};offset:${offset}`,300,JSON.stringify(users))
         return res.status(200).json({success:true,message:"listing all users",users})
 }
 
