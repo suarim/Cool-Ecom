@@ -2,14 +2,10 @@ const mongoose = require('mongoose');
 const { Cart } = require('../models/Cart');
 const { sendMessage } = require('../Kafka/producer');
 const { stripelink } = require('../Kafka/consumer');
-const Redis = require('ioredis');
 const { invalidateCache } = require('../Redis/Redis');
-const redis = new Redis(process.env.REDIS_URL)
-redis.on('connect', () => {
-    console.log('----------------------------->add Connected to Redis');
-  });
+
 // console.log('----------------------------->add Connected to Redis');
-// let p=await redis.get('x')
+// let p=await req.redis.get('x')
 // console.log(p)
 // console.log('----------------------------->add Connected to Redis');
 
@@ -105,7 +101,7 @@ const UpdateCart = async (req, res) => {
 
 const GetCart = async (req, res) => {
   const cartkey = `cart:${req.id}`;
-  const cached_cart = await redis.get(cartkey);
+  const cached_cart = await req.redis.get(cartkey);
   if (cached_cart) {
     return res.status(200).json({message:"Cart fetched from cache", cart: JSON.parse(cached_cart)});
   }
@@ -113,7 +109,7 @@ const GetCart = async (req, res) => {
     if (!cart) {
         return res.status(404).json({ message: 'Cart not found' });
     }
-    await redis.setex(cartkey,60 * 60 * 24,JSON.stringify(cart));
+    await req.redis.setex(cartkey,60 * 60 * 24,JSON.stringify(cart));
     return res.status(200).json(cart);
 }
 
@@ -144,7 +140,7 @@ const Checkout = async (req, res) => {
       // await setTimeout(()=>3000)
       // Ensure the payment link is set in Redis before proceeding
       const stripe_link = await new Promise((resolve, reject) => {
-        redis.get('payment-link', (err, result) => {
+        req.redis.get('payment-link', (err, result) => {
           if (err) reject(err);
           else resolve(result);
         });
