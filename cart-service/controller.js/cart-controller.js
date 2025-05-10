@@ -2,13 +2,10 @@ const mongoose = require('mongoose');
 const { Cart } = require('../models/Cart');
 const { sendMessage } = require('../Kafka/producer');
 const { stripelink } = require('../Kafka/consumer');
-const Redis = require('ioredis');
-const redis = new Redis(process.env.REDIS_URL)
-redis.on('connect', () => {
-    console.log('----------------------------->add Connected to Redis');
-  });
+const { invalidateCache } = require('../Redis/Redis');
+
 // console.log('----------------------------->add Connected to Redis');
-// let p=await redis.get('x')
+// let p=await req.redis.get('x')
 // console.log(p)
 // console.log('----------------------------->add Connected to Redis');
 
@@ -36,6 +33,7 @@ const AddToCart = async (req, res) => {
         console.log(cart.totalPrice);
         cart.totalItems += quantity;
         await cart.save();
+        invalidateCache(`cart:${req.id}`);
         return res.status(200).json({message:'Product added to cart successfully',cart});
         
     }
@@ -64,6 +62,7 @@ const DeleteFromCart = async (req, res) => {
     cart.totalPrice -= product.quantity * p.cost;
     cart.totalItems -= product.quantity;
     await cart.save();
+    invalidateCache(`cart:${req.id}`);
     return res.status(200).json({ message: 'Product removed from cart successfully', cart });
 
 }
@@ -94,15 +93,23 @@ const UpdateCart = async (req, res) => {
     // console.log(cart.totalPrice);
     // console.log(cart.totalItems);
     await cart.save();
+    invalidateCache(`cart:${req.id}`);
+
     // console.log(cart);
     return res.status(200).json({ message: 'Cart updated successfully', cart });
 }
 
 const GetCart = async (req, res) => {
+  const cartkey = `cart:${req.id}`;
+  const cached_cart = await req.redis.get(cartkey);
+  if (cached_cart) {
+    return res.status(200).json({message:"Cart fetched from cache", cart: JSON.parse(cached_cart)});
+  }
     const cart = await Cart.findOne({ userId: req.id });
     if (!cart) {
         return res.status(404).json({ message: 'Cart not found' });
     }
+    await req.redis.setex(cartkey,60 * 60 * 24,JSON.stringify(cart));
     return res.status(200).json(cart);
 }
 
@@ -129,12 +136,11 @@ const Checkout = async (req, res) => {
         product.productcost = p.cost;
       }
   
-      // Send the cart details to Kafka producer (i.e., for processing further)
       await sendMessage(cartCopy, req.email);
-  
+      // await setTimeout(()=>3000)
       // Ensure the payment link is set in Redis before proceeding
       const stripe_link = await new Promise((resolve, reject) => {
-        redis.get('payment-link', (err, result) => {
+        req.redis.get('payment-link', (err, result) => {
           if (err) reject(err);
           else resolve(result);
         });
