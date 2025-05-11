@@ -6,7 +6,7 @@ const { UserRegisterSchemaValidation } = require('../validation/validation');
 const { registerUser, loginUser } = require('./identity_controller');
 
 const sendOTPController = async (req,res)=>{
-    const {email,password,username,age,type} = req.body;
+    const {email,password,username,age,type,role} = req.body;
     if(!type){
         logger.error('Type not provided');
         return res.status(400).json({success:false,message:'Type not provided'});
@@ -22,7 +22,7 @@ const sendOTPController = async (req,res)=>{
     }
     const otp = generateOTP();
     sendOtpSMS("+919632717819",email,otp)
-    otpmap = await req.redis.set(email,JSON.stringify({otp,email,password,username,age,type}), 'EX', 300)
+    otpmap = await req.redis.set(email,JSON.stringify({otp,email,password,username,age,type,role}), 'EX', 300)
     if(otpmap){
         logger.info('OTP sent successfully');
         return res.status(200).json({success:true,message:'OTP sent successfully',data:{
@@ -48,10 +48,10 @@ const verifyotp = async (req,res)=>{
         logger.error('Invalid OTP');
         return res.status(400).json({success:false,message:'Invalid OTP'});
     }
-    const {otp,email,password,username,age,type} = cachedotp;
+    const {otp,email,password,username,age,type,role} = cachedotp;
     if(type === 'register'){
     await req.redis.set(`verified:${email}`, 'true', 'EX', 600); 
-    req.body = {email,password,username,age}
+    req.body = {email,password,username,age,role}
     // req.redis.del(user_email)
     logger.info('OTP verified successfully');
     return registerUser(req,res);
@@ -60,7 +60,7 @@ const verifyotp = async (req,res)=>{
         await req.redis.set(`verified:${email}`, 'true', 'EX', 600); 
         req.redis.del(user_email)
         logger.info('OTP verified successfully');
-        req.body = {email,password}
+        req.body = {email,password,role}
         // req.redis.del(user_email)
         return loginUser(req,res);
     }
