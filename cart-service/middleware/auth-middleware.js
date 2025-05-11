@@ -12,9 +12,9 @@ const authmiddleware = async (req, res, next) => {
     if(!id || !email || !role){
         return res.status(401).json({message:'Invalid token'});
     }
-    if(role !== 'user'){
-        return res.status(401).json({message:'Unauthorized'});
-    }
+    // if(role !== 'user'){
+    //     return res.status(401).json({message:'Unauthorized'});
+    // }
     const user = await mongoose.connection.db.collection('users').findOne({ _id: new mongoose.Types.ObjectId(id) }); 
     if(!user){
         return res.status(401).json({message:'User not found'});
