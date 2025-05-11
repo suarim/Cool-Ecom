@@ -18,4 +18,6 @@ chat-service/.env
 combined.log
 error.log
 info.log
+Product-Service/.env
 warn.log
+Product-Service/node_modules
