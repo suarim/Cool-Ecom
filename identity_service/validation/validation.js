@@ -6,6 +6,7 @@ const UserRegisterSchemaValidation = (data)=>{
         password:JOI.string().min(6).max(20).required(),
         age:JOI.number().min(18).max(100).required(),
         email:JOI.string().email().required(),
+        role:JOI.string().valid('admin','user').default('user'),
     })
     return schema.validate(data);
 }
