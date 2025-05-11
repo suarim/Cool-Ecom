@@ -7,8 +7,14 @@ const authmiddleware = async (req, res, next) => {
     if(!auth){
         return res.status(401).json({message:'Authorization header is missing'});
     }
-    const {id,email} = jwt.verify(auth,process.env.JWT_SECRET);
-    console.log(id,email)
+    const {id,email,role} = jwt.verify(auth, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+    console.log(id,email,role)
+    if(!id || !email || !role){
+        return res.status(401).json({message:'Invalid token'});
+    }
+    // if(role !== 'user'){
+    //     return res.status(401).json({message:'Unauthorized'});
+    // }
     const user = await mongoose.connection.db.collection('users').findOne({ _id: new mongoose.Types.ObjectId(id) }); 
     if(!user){
         return res.status(401).json({message:'User not found'});

@@ -4,7 +4,7 @@ const {logger} = require('./logger');
 
 const GenerateToken = async (data)=>{
     logger.info('Generating auth token')
-    const token = jwt.sign({id:data.id,email:data.email},process.env.JWT_SECRET,{expiresIn:'7d',algorithm: 'HS256',
+    const token = jwt.sign({id:data.id,email:data.email,role:data.role},process.env.JWT_SECRET,{expiresIn:'7d',algorithm: 'HS256',
         issuer: 'cool-ecom',
         audience: 'nobody'})
     logger.info(`New auth token generated --> ${token}`)

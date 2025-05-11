@@ -12,7 +12,7 @@ const registerUser = async (req,res)=>{
         logger.error('OTP not verified');
         return res.status(400).json({success:false,message:'OTP not verified'});
     }
-    const {email,password,username,age} = req.body;
+    const {email,password,username,age,role} = req.body;
     const {error} = UserRegisterSchemaValidation(req.body);
     if(error){
         logger.error('Validation error',error);
@@ -29,10 +29,11 @@ const registerUser = async (req,res)=>{
         email,
         username,
         password:hashpassword,
-        age
+        age,
+        role
     })
     await newUser.save()
-    const token = await GenerateToken({id:newUser._id,email:newUser.email})
+    const token = await GenerateToken({id:newUser._id,email:newUser.email,role:newUser.role})
     logger.info('User created successfully');
    await emitUsercreateEvent(newUser._id)
     return res.status(201).json({success:true,message:'User created successfully',data:{
